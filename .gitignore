@@ -3,3 +3,6 @@ __pycache__/
 *.pyc
 outputs/
 .env
+notebooks/
+*.mp3
+*.wav
