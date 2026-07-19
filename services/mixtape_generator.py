@@ -14,22 +14,37 @@ class MixtapeGenerator:
         return AudioSegment.from_file(file_path, format=audio_format)
 
 
-    def trim_audio(self, audio:AudioSegment, start_time_ms:int, end_time_ms:int):
+    def trim_audio(self, audio:AudioSegment, start_time:int, end_time:int):
         """This function trims an audio segment to the specified start and end times."""
-        return audio[start_time_ms:end_time_ms]
+        return audio[start_time*1000:end_time*1000]
 
 
-    def normalize_audio(self): 
-        pass
+    def normalize_audio(self, audio:AudioSegment):
+        """This function normalizes the audio segment."""
+        return audio.normalize()
+
+    def apply_fade(self, audio:AudioSegment, fade_in_duration:int, fade_out_duration:int):
+        """This function applies fade in and fade out effects to the audio segment."""
+        return audio.fade_in(fade_in_duration*1000).fade_out(fade_out_duration*1000)
 
 
-    def apply_fade(self):
-        pass
+    def merge_tracks(self, tracks:list, crossfade_ms:int=1000):
+        """This function merges multiple audio tracks into a single track."""
+        if not tracks:
+            raise ValueError("The tracks list is empty. Nothing to merge.")
+        
+        mixtape = tracks[0]
+        for track in tracks[1:]:
+            # Ensure the crossfade isn't longer than the tracks themselves to avoid errors
+            safe_crossfade = min(crossfade_ms, len(mixtape), len(track))
+            mixtape = mixtape.append(track, crossfade=safe_crossfade)
+        
+        return mixtape
 
 
-    def merge_tracks(self):
-        pass
-
-
-    def export(self):
-        pass
+    def export(self, audio:AudioSegment, file_path:str, audio_format:str):
+        """This function exports the audio segment to a file."""
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)  # Ensure the directory exists
+        print(f"Exporting mixtape to {file_path} in {audio_format} format.")
+        audio.export(file_path, format=audio_format)
+        print("Export completed successfully.")
